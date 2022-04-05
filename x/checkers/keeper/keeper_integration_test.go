@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	"github.com/xavierlepretre/checkers/app"
+	"github.com/xavierlepretre/checkers/x/checkers/keeper"
 	"github.com/xavierlepretre/checkers/x/checkers/types"
 )
 
@@ -17,6 +18,7 @@ type IntegrationTestSuite struct {
 	suite.Suite
 
 	app         *app.App
+	msgServer   types.MsgServer
 	ctx         sdk.Context
 	queryClient types.QueryClient
 }
@@ -37,6 +39,7 @@ func (suite *IntegrationTestSuite) SetupTest() {
 	queryClient := types.NewQueryClient(queryHelper)
 
 	suite.app = app
+	suite.msgServer = keeper.NewMsgServerImpl(app.CheckersKeeper)
 	suite.ctx = ctx
 	suite.queryClient = queryClient
 }
@@ -45,4 +48,28 @@ func (suite *IntegrationTestSuite) TestGenesisNextGame() {
 	nextGame, err := suite.queryClient.NextGame(sdk.WrapSDKContext(suite.ctx), &types.QueryGetNextGameRequest{})
 	suite.Require().Nil(err)
 	suite.Require().Equal(uint64(1), nextGame.NextGame.IdValue)
+}
+
+func (suite *IntegrationTestSuite) TestCreateGameReturnsNextGameId() {
+	suite.app.CheckersKeeper.SetNextGame(suite.ctx, types.NextGame{
+		Creator: "",
+		IdValue: 23,
+	})
+	black := sdk.AccAddress([]byte("addr1_______________"))
+	red := sdk.AccAddress([]byte("addr2_______________"))
+
+	response, err := suite.msgServer.CreateGame(sdk.WrapSDKContext(suite.ctx), &types.MsgCreateGame{
+		Creator: black.String(),
+		Black:   black.String(),
+		Red:     red.String(),
+	})
+	suite.Require().NoError(err)
+	suite.Require().EqualValues(&types.MsgCreateGameResponse{IdValue: "23"}, response)
+
+	nextGame, found := suite.app.CheckersKeeper.GetNextGame(suite.ctx)
+	suite.Require().True(found)
+	suite.Require().EqualValues(types.NextGame{
+		Creator: "",
+		IdValue: 24,
+	}, nextGame)
 }
