@@ -1,0 +1,15 @@
+# Move to /etc/systemd/system/checkersd.service
+
+[Unit]
+Description=Checkers Chain Daemon
+After=network-online.target
+
+[Service]
+User=checkersuser
+ExecStart=$(which checkersd) start
+Restart=always
+RestartSec=3
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
