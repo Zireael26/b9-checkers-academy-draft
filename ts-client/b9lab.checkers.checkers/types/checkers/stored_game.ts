@@ -1,6 +1,6 @@
 /* eslint-disable */
-import * as Long from "long";
-import { util, configure, Writer, Reader } from "protobufjs/minimal";
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "b9lab.checkers.checkers";
 
@@ -19,23 +19,25 @@ export interface StoredGame {
   denom: string;
 }
 
-const baseStoredGame: object = {
-  index: "",
-  board: "",
-  turn: "",
-  black: "",
-  red: "",
-  moveCount: 0,
-  beforeIndex: "",
-  afterIndex: "",
-  deadline: "",
-  winner: "",
-  wager: 0,
-  denom: "",
-};
+function createBaseStoredGame(): StoredGame {
+  return {
+    index: "",
+    board: "",
+    turn: "",
+    black: "",
+    red: "",
+    moveCount: 0,
+    beforeIndex: "",
+    afterIndex: "",
+    deadline: "",
+    winner: "",
+    wager: 0,
+    denom: "",
+  };
+}
 
 export const StoredGame = {
-  encode(message: StoredGame, writer: Writer = Writer.create()): Writer {
+  encode(message: StoredGame, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.index !== "") {
       writer.uint32(10).string(message.index);
     }
@@ -75,10 +77,10 @@ export const StoredGame = {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): StoredGame {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): StoredGame {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseStoredGame } as StoredGame;
+    const message = createBaseStoredGame();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -127,68 +129,20 @@ export const StoredGame = {
   },
 
   fromJSON(object: any): StoredGame {
-    const message = { ...baseStoredGame } as StoredGame;
-    if (object.index !== undefined && object.index !== null) {
-      message.index = String(object.index);
-    } else {
-      message.index = "";
-    }
-    if (object.board !== undefined && object.board !== null) {
-      message.board = String(object.board);
-    } else {
-      message.board = "";
-    }
-    if (object.turn !== undefined && object.turn !== null) {
-      message.turn = String(object.turn);
-    } else {
-      message.turn = "";
-    }
-    if (object.black !== undefined && object.black !== null) {
-      message.black = String(object.black);
-    } else {
-      message.black = "";
-    }
-    if (object.red !== undefined && object.red !== null) {
-      message.red = String(object.red);
-    } else {
-      message.red = "";
-    }
-    if (object.moveCount !== undefined && object.moveCount !== null) {
-      message.moveCount = Number(object.moveCount);
-    } else {
-      message.moveCount = 0;
-    }
-    if (object.beforeIndex !== undefined && object.beforeIndex !== null) {
-      message.beforeIndex = String(object.beforeIndex);
-    } else {
-      message.beforeIndex = "";
-    }
-    if (object.afterIndex !== undefined && object.afterIndex !== null) {
-      message.afterIndex = String(object.afterIndex);
-    } else {
-      message.afterIndex = "";
-    }
-    if (object.deadline !== undefined && object.deadline !== null) {
-      message.deadline = String(object.deadline);
-    } else {
-      message.deadline = "";
-    }
-    if (object.winner !== undefined && object.winner !== null) {
-      message.winner = String(object.winner);
-    } else {
-      message.winner = "";
-    }
-    if (object.wager !== undefined && object.wager !== null) {
-      message.wager = Number(object.wager);
-    } else {
-      message.wager = 0;
-    }
-    if (object.denom !== undefined && object.denom !== null) {
-      message.denom = String(object.denom);
-    } else {
-      message.denom = "";
-    }
-    return message;
+    return {
+      index: isSet(object.index) ? String(object.index) : "",
+      board: isSet(object.board) ? String(object.board) : "",
+      turn: isSet(object.turn) ? String(object.turn) : "",
+      black: isSet(object.black) ? String(object.black) : "",
+      red: isSet(object.red) ? String(object.red) : "",
+      moveCount: isSet(object.moveCount) ? Number(object.moveCount) : 0,
+      beforeIndex: isSet(object.beforeIndex) ? String(object.beforeIndex) : "",
+      afterIndex: isSet(object.afterIndex) ? String(object.afterIndex) : "",
+      deadline: isSet(object.deadline) ? String(object.deadline) : "",
+      winner: isSet(object.winner) ? String(object.winner) : "",
+      wager: isSet(object.wager) ? Number(object.wager) : 0,
+      denom: isSet(object.denom) ? String(object.denom) : "",
+    };
   },
 
   toJSON(message: StoredGame): unknown {
@@ -198,103 +152,63 @@ export const StoredGame = {
     message.turn !== undefined && (obj.turn = message.turn);
     message.black !== undefined && (obj.black = message.black);
     message.red !== undefined && (obj.red = message.red);
-    message.moveCount !== undefined && (obj.moveCount = message.moveCount);
-    message.beforeIndex !== undefined &&
-      (obj.beforeIndex = message.beforeIndex);
+    message.moveCount !== undefined && (obj.moveCount = Math.round(message.moveCount));
+    message.beforeIndex !== undefined && (obj.beforeIndex = message.beforeIndex);
     message.afterIndex !== undefined && (obj.afterIndex = message.afterIndex);
     message.deadline !== undefined && (obj.deadline = message.deadline);
     message.winner !== undefined && (obj.winner = message.winner);
-    message.wager !== undefined && (obj.wager = message.wager);
+    message.wager !== undefined && (obj.wager = Math.round(message.wager));
     message.denom !== undefined && (obj.denom = message.denom);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<StoredGame>): StoredGame {
-    const message = { ...baseStoredGame } as StoredGame;
-    if (object.index !== undefined && object.index !== null) {
-      message.index = object.index;
-    } else {
-      message.index = "";
-    }
-    if (object.board !== undefined && object.board !== null) {
-      message.board = object.board;
-    } else {
-      message.board = "";
-    }
-    if (object.turn !== undefined && object.turn !== null) {
-      message.turn = object.turn;
-    } else {
-      message.turn = "";
-    }
-    if (object.black !== undefined && object.black !== null) {
-      message.black = object.black;
-    } else {
-      message.black = "";
-    }
-    if (object.red !== undefined && object.red !== null) {
-      message.red = object.red;
-    } else {
-      message.red = "";
-    }
-    if (object.moveCount !== undefined && object.moveCount !== null) {
-      message.moveCount = object.moveCount;
-    } else {
-      message.moveCount = 0;
-    }
-    if (object.beforeIndex !== undefined && object.beforeIndex !== null) {
-      message.beforeIndex = object.beforeIndex;
-    } else {
-      message.beforeIndex = "";
-    }
-    if (object.afterIndex !== undefined && object.afterIndex !== null) {
-      message.afterIndex = object.afterIndex;
-    } else {
-      message.afterIndex = "";
-    }
-    if (object.deadline !== undefined && object.deadline !== null) {
-      message.deadline = object.deadline;
-    } else {
-      message.deadline = "";
-    }
-    if (object.winner !== undefined && object.winner !== null) {
-      message.winner = object.winner;
-    } else {
-      message.winner = "";
-    }
-    if (object.wager !== undefined && object.wager !== null) {
-      message.wager = object.wager;
-    } else {
-      message.wager = 0;
-    }
-    if (object.denom !== undefined && object.denom !== null) {
-      message.denom = object.denom;
-    } else {
-      message.denom = "";
-    }
+  fromPartial<I extends Exact<DeepPartial<StoredGame>, I>>(object: I): StoredGame {
+    const message = createBaseStoredGame();
+    message.index = object.index ?? "";
+    message.board = object.board ?? "";
+    message.turn = object.turn ?? "";
+    message.black = object.black ?? "";
+    message.red = object.red ?? "";
+    message.moveCount = object.moveCount ?? 0;
+    message.beforeIndex = object.beforeIndex ?? "";
+    message.afterIndex = object.afterIndex ?? "";
+    message.deadline = object.deadline ?? "";
+    message.winner = object.winner ?? "";
+    message.wager = object.wager ?? 0;
+    message.denom = object.denom ?? "";
     return message;
   },
 };
 
 declare var self: any | undefined;
 declare var window: any | undefined;
+declare var global: any | undefined;
 var globalThis: any = (() => {
-  if (typeof globalThis !== "undefined") return globalThis;
-  if (typeof self !== "undefined") return self;
-  if (typeof window !== "undefined") return window;
-  if (typeof global !== "undefined") return global;
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
   throw "Unable to locate global object";
 })();
 
-type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends {}
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function longToNumber(long: Long): number {
   if (long.gt(Number.MAX_SAFE_INTEGER)) {
@@ -303,7 +217,11 @@ function longToNumber(long: Long): number {
   return long.toNumber();
 }
 
-if (util.Long !== Long) {
-  util.Long = Long as any;
-  configure();
+if (_m0.util.Long !== Long) {
+  _m0.util.Long = Long as any;
+  _m0.configure();
+}
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
 }
