@@ -1,11 +1,14 @@
 import { Client, registry, MissingWalletError } from 'b9lab-checkers-client-ts'
 
+import { Leaderboard } from "b9lab-checkers-client-ts/b9lab.checkers.checkers/types"
 import { Params } from "b9lab-checkers-client-ts/b9lab.checkers.checkers/types"
+import { PlayerInfo } from "b9lab-checkers-client-ts/b9lab.checkers.checkers/types"
 import { StoredGame } from "b9lab-checkers-client-ts/b9lab.checkers.checkers/types"
 import { SystemInfo } from "b9lab-checkers-client-ts/b9lab.checkers.checkers/types"
+import { WinningPlayer } from "b9lab-checkers-client-ts/b9lab.checkers.checkers/types"
 
 
-export { Params, StoredGame, SystemInfo };
+export { Leaderboard, Params, PlayerInfo, StoredGame, SystemInfo, WinningPlayer };
 
 function initClient(vuexGetters) {
 	return new Client(vuexGetters['common/env/getEnv'], vuexGetters['common/wallet/signer'])
@@ -41,11 +44,17 @@ const getDefaultState = () => {
 				StoredGame: {},
 				StoredGameAll: {},
 				CanPlayMove: {},
+				PlayerInfo: {},
+				PlayerInfoAll: {},
+				Leaderboard: {},
 				
 				_Structure: {
+						Leaderboard: getStructure(Leaderboard.fromPartial({})),
 						Params: getStructure(Params.fromPartial({})),
+						PlayerInfo: getStructure(PlayerInfo.fromPartial({})),
 						StoredGame: getStructure(StoredGame.fromPartial({})),
 						SystemInfo: getStructure(SystemInfo.fromPartial({})),
+						WinningPlayer: getStructure(WinningPlayer.fromPartial({})),
 						
 		},
 		_Registry: registry,
@@ -103,6 +112,24 @@ export default {
 						(<any> params).query=null
 					}
 			return state.CanPlayMove[JSON.stringify(params)] ?? {}
+		},
+				getPlayerInfo: (state) => (params = { params: {}}) => {
+					if (!(<any> params).query) {
+						(<any> params).query=null
+					}
+			return state.PlayerInfo[JSON.stringify(params)] ?? {}
+		},
+				getPlayerInfoAll: (state) => (params = { params: {}}) => {
+					if (!(<any> params).query) {
+						(<any> params).query=null
+					}
+			return state.PlayerInfoAll[JSON.stringify(params)] ?? {}
+		},
+				getLeaderboard: (state) => (params = { params: {}}) => {
+					if (!(<any> params).query) {
+						(<any> params).query=null
+					}
+			return state.Leaderboard[JSON.stringify(params)] ?? {}
 		},
 				
 		getTypeStructure: (state) => (type) => {
@@ -252,6 +279,89 @@ export default {
 		},
 		
 		
+		
+		
+		 		
+		
+		
+		async QueryPlayerInfo({ commit, rootGetters, getters }, { options: { subscribe, all} = { subscribe:false, all:false}, params, query=null }) {
+			try {
+				const key = params ?? {};
+				const client = initClient(rootGetters);
+				let value= (await client.B9LabCheckersCheckers.query.queryPlayerInfo( key.index)).data
+				
+					
+				commit('QUERY', { query: 'PlayerInfo', key: { params: {...key}, query}, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryPlayerInfo', payload: { options: { all }, params: {...key},query }})
+				return getters['getPlayerInfo']( { params: {...key}, query}) ?? {}
+			} catch (e) {
+				throw new Error('QueryClient:QueryPlayerInfo API Node Unavailable. Could not perform query: ' + e.message)
+				
+			}
+		},
+		
+		
+		
+		
+		 		
+		
+		
+		async QueryPlayerInfoAll({ commit, rootGetters, getters }, { options: { subscribe, all} = { subscribe:false, all:false}, params, query=null }) {
+			try {
+				const key = params ?? {};
+				const client = initClient(rootGetters);
+				let value= (await client.B9LabCheckersCheckers.query.queryPlayerInfoAll(query ?? undefined)).data
+				
+					
+				while (all && (<any> value).pagination && (<any> value).pagination.next_key!=null) {
+					let next_values=(await client.B9LabCheckersCheckers.query.queryPlayerInfoAll({...query ?? {}, 'pagination.key':(<any> value).pagination.next_key} as any)).data
+					value = mergeResults(value, next_values);
+				}
+				commit('QUERY', { query: 'PlayerInfoAll', key: { params: {...key}, query}, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryPlayerInfoAll', payload: { options: { all }, params: {...key},query }})
+				return getters['getPlayerInfoAll']( { params: {...key}, query}) ?? {}
+			} catch (e) {
+				throw new Error('QueryClient:QueryPlayerInfoAll API Node Unavailable. Could not perform query: ' + e.message)
+				
+			}
+		},
+		
+		
+		
+		
+		 		
+		
+		
+		async QueryLeaderboard({ commit, rootGetters, getters }, { options: { subscribe, all} = { subscribe:false, all:false}, params, query=null }) {
+			try {
+				const key = params ?? {};
+				const client = initClient(rootGetters);
+				let value= (await client.B9LabCheckersCheckers.query.queryLeaderboard()).data
+				
+					
+				commit('QUERY', { query: 'Leaderboard', key: { params: {...key}, query}, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryLeaderboard', payload: { options: { all }, params: {...key},query }})
+				return getters['getLeaderboard']( { params: {...key}, query}) ?? {}
+			} catch (e) {
+				throw new Error('QueryClient:QueryLeaderboard API Node Unavailable. Could not perform query: ' + e.message)
+				
+			}
+		},
+		
+		
+		async sendMsgCreateGame({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.B9LabCheckersCheckers.tx.sendMsgCreateGame({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgCreateGame:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgCreateGame:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
 		async sendMsgPlayMove({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -278,20 +388,20 @@ export default {
 				}
 			}
 		},
-		async sendMsgCreateGame({ rootGetters }, { value, fee = [], memo = '' }) {
+		
+		async MsgCreateGame({ rootGetters }, { value }) {
 			try {
-				const client=await initClient(rootGetters)
-				const result = await client.B9LabCheckersCheckers.tx.sendMsgCreateGame({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
+				const client=initClient(rootGetters)
+				const msg = await client.B9LabCheckersCheckers.tx.msgCreateGame({value})
+				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
 					throw new Error('TxClient:MsgCreateGame:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgCreateGame:Send Could not broadcast Tx: '+ e.message)
+				} else{
+					throw new Error('TxClient:MsgCreateGame:Create Could not create message: ' + e.message)
 				}
 			}
 		},
-		
 		async MsgPlayMove({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -315,19 +425,6 @@ export default {
 					throw new Error('TxClient:MsgRejectGame:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgRejectGame:Create Could not create message: ' + e.message)
-				}
-			}
-		},
-		async MsgCreateGame({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.B9LabCheckersCheckers.tx.msgCreateGame({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgCreateGame:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgCreateGame:Create Could not create message: ' + e.message)
 				}
 			}
 		},
